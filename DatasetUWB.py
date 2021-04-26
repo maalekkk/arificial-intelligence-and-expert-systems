@@ -20,7 +20,7 @@ class DatasetUWD:
             self.reference.append([row[2], row[3]])
 
     def import_static_data(self):
-        for i in range(1, 25):
+        for i in range(1, 225):
             file_path = "./dane/pomiary/F" + str(self.audience_no) + "/f" + str(self.audience_no) + "_stat_" + str(
                 i) + ".xlsx"
             self.import_file(file_path)
@@ -28,11 +28,3 @@ class DatasetUWD:
     def get_torch_dataset(self):
         return torch.from_numpy(np.array(self.coords).astype(np.float32)), torch.from_numpy(
             np.array(self.reference).astype(np.float32))
-
-
-if __name__ == '__main__':
-    d = DatasetUWD(8)
-    d.import_file("./dane/pomiary/F8/f8_stat_1.xlsx")
-    c, r = d.get_torch_dataset()
-    print(c)
-    print(r)
