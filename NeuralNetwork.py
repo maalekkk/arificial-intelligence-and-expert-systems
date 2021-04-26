@@ -6,11 +6,11 @@ import DatasetUWB
 class NeuralNetwork(nn.Module):
     def __init__(self):
         super(NeuralNetwork, self).__init__()
-        self.fc1 = nn.Linear(2, 10)
+        self.fc1 = nn.Linear(2, 100)
         self.relu1 = nn.ReLU()
-        self.fc2 = nn.Linear(10, 6)
+        self.fc2 = nn.Linear(100, 60)
         self.relu2 = nn.ReLU()
-        self.fc3 = nn.Linear(6, 2)
+        self.fc3 = nn.Linear(60, 2)
 
     # def __init__(self):
     #     super(NeuralNetwork, self).__init__()
@@ -42,7 +42,7 @@ class NeuralNetwork(nn.Module):
         assert(len(training_data) == len(reference_data))
 
         criterion = nn.L1Loss()
-        optimizer = optim.SGD(self.parameters(), lr=0.05)
+        optimizer = optim.SGD(self.parameters(), lr=0.05, momentum=0.05)
 
         for epoch in range(epochs):
             running_loss = 0
