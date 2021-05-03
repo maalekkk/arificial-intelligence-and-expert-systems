@@ -1,4 +1,8 @@
+import torch
 from torch import nn, optim
+from torch_lr_finder import LRFinder
+from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import Dataset
 import Errors
 import Animation
 import DatasetUWB
@@ -10,11 +14,13 @@ class NeuralNetwork(nn.Module):
         super(NeuralNetwork, self).__init__()
         self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(inputs_size, 100),
+            nn.Linear(inputs_size, 64),
             nn.ReLU(),
-            nn.Linear(100, 60),
+            nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(60, output_size),
+            nn.Linear(32, 16),
+            nn.ReLU(),
+            nn.Linear(16, output_size),
             nn.ReLU()
         )
 
@@ -27,8 +33,8 @@ class NeuralNetwork(nn.Module):
         assert (epochs > 0)
         assert (len(training_data) == len(reference_data))
         criterion = nn.L1Loss()
-        optimizer = optim.Adam(self.parameters(), lr=0.0001)
-
+        optimizer = optim.Adam(self.parameters(), lr=2.07E-03, weight_decay=5e-5)
+        # 2.03E-03
         for epoch in range(epochs):
             running_loss = 0
             optimizer.zero_grad()
@@ -44,6 +50,14 @@ class NeuralNetwork(nn.Module):
         output = self(data)
         return output.detach().numpy()
 
+    def find_lr(self, device, trainloader):
+        criterion = nn.L1Loss()
+        optimizer = optim.Adam(self.parameters(), lr=0.000001, weight_decay=5e-5)
+        lr_finder = LRFinder(self, optimizer, criterion, device=device)
+        lr_finder.range_test(trainloader, end_lr=1, num_iter=200)
+        lr_finder.plot()
+        lr_finder.reset()
+
 
 if __name__ == '__main__':
     train_data = DatasetUWB.DatasetUWD(8)
@@ -51,11 +65,16 @@ if __name__ == '__main__':
     coords_train, reference_train = train_data.get_torch_dataset()
 
     test_data = DatasetUWB.DatasetUWD(8)
-    test_data.import_file("./dane/pomiary/F8/f8_random_2p.xlsx")
+    test_data.import_file("./dane/pomiary/F8/f8_2p.xlsx")
     coords_test, reference_test = test_data.get_torch_dataset()
 
-    network = NeuralNetwork(2, 2)
-    network.perform_training(1000, coords_train, reference_train)
+    device = 'cpu' if torch.cuda.is_available() else 'cpu'
+    network = NeuralNetwork(2, 2).to(device)
+
+    # dataset = TensorDataset(coords_train, reference_train)
+    # dataloader = DataLoader(dataset)
+    # network.find_lr("cuda", dataloader)
+    network.perform_training(500, coords_train, reference_train)
 
     out = network.predict(coords_test)
 
