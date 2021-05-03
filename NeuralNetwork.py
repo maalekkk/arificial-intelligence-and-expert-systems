@@ -4,6 +4,7 @@ from torch_lr_finder import LRFinder
 from torch.utils.data import DataLoader, TensorDataset
 from torch.utils.data import Dataset
 import Errors
+import random
 import Animation
 import DatasetUWB
 
@@ -29,13 +30,17 @@ class NeuralNetwork(nn.Module):
         vector = self.linear_relu_stack(x)
         return vector
 
-    def perform_training(self, epochs, training_data, reference_data):
+    def perform_training(self, epochs, training_data, reference_data, lr=2.07E-03):
         assert (epochs > 0)
         assert (len(training_data) == len(reference_data))
         criterion = nn.L1Loss()
-        optimizer = optim.Adam(self.parameters(), lr=2.07E-03, weight_decay=5e-5)
-        # 2.03E-03
+        optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=5e-5)
+
         for epoch in range(epochs):
+            if True:
+                idx = torch.randperm(training_data.nelement())
+                training_data = training_data.view(-1)[idx].view(training_data.size())
+                reference_data = reference_data.view(-1)[idx].view(reference_data.size())
             running_loss = 0
             optimizer.zero_grad()
             output = self(training_data)
@@ -54,7 +59,7 @@ class NeuralNetwork(nn.Module):
         criterion = nn.L1Loss()
         optimizer = optim.Adam(self.parameters(), lr=0.000001, weight_decay=5e-5)
         lr_finder = LRFinder(self, optimizer, criterion, device=device)
-        lr_finder.range_test(trainloader, end_lr=1, num_iter=200)
+        lr_finder.range_test(trainloader, end_lr=1, num_iter=500)
         lr_finder.plot()
         lr_finder.reset()
 
@@ -74,7 +79,8 @@ if __name__ == '__main__':
     # dataset = TensorDataset(coords_train, reference_train)
     # dataloader = DataLoader(dataset)
     # network.find_lr("cuda", dataloader)
-    network.perform_training(500, coords_train, reference_train)
+
+    network.perform_training(300, coords_train, reference_train)
 
     out = network.predict(coords_test)
 
