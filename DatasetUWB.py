@@ -25,7 +25,7 @@ class DatasetUWD:
                 pass
 
     def import_static_data(self, err_tolerance=500):
-        for i in range(220, 225):
+        for i in range(1, 226):
             file_path = "./dane/pomiary/F" + str(self.audience_no) + "/f" + str(self.audience_no) + "_stat_" + str(
                 i) + ".xlsx"
             self.import_file(file_path, err_tolerance=err_tolerance)
@@ -33,3 +33,19 @@ class DatasetUWD:
     def get_torch_dataset(self):
         return torch.from_numpy(np.array(self.coords).astype(np.float32)), torch.from_numpy(
             np.array(self.reference).astype(np.float32))
+
+    # def get_torch_dataset(self, samples_no):
+    #     # for i in range(no_of_last_samples, len(learning_data) + 1):
+    #     #     inputs = [data[0] for data in learning_data[i - no_of_last_samples:i]] \
+    #     #              + [data[1] for data in learning_data[i - no_of_last_samples:i]]
+    #     #     outputs = [learning_data[i - 1][2], learning_data[i - 1][3]]
+    #     #     mlp.learn(inputs, outputs, 0.05)
+    #     input = []
+    #     output = []
+    #     for i in range(samples_no, len(self.coords) + 1):
+    #         input.append(self.coords[i - samples_no])
+    #         output.append(self.reference[i - samples_no])
+
+    def clear(self):
+        self.coords = []
+        self.reference = []
