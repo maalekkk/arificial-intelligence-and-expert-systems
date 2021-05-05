@@ -1,6 +1,7 @@
 import pandas as pd
 import torch
 import numpy as np
+from torch.utils.data import DataLoader, TensorDataset
 
 
 class DatasetUWD:
@@ -28,3 +29,14 @@ class DatasetUWD:
     def get_torch_dataset(self):
         return torch.from_numpy(np.array(self.coords).astype(np.float32)), torch.from_numpy(
             np.array(self.reference).astype(np.float32))
+
+    def get_data_loader(self):
+        coords = torch.tensor(self.coords, dtype=torch.float)
+        reference = torch.tensor(self.reference, dtype=torch.float)
+        dataset = TensorDataset(coords, reference)
+        dataloader = DataLoader(dataset, shuffle=True, batch_size=32)
+        return dataloader
+
+    def clear(self):
+        self.coords = []
+        self.reference = []

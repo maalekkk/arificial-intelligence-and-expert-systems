@@ -30,26 +30,25 @@ class NeuralNetwork(nn.Module):
         vector = self.linear_relu_stack(x)
         return vector
 
-    def perform_training(self, epochs, training_data, reference_data, lr=2.07E-03):
+    def perform_training(self, epochs, dataloader, lr=2.07E-03):
         assert (epochs > 0)
-        assert (len(training_data) == len(reference_data))
         criterion = nn.L1Loss()
         optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=5e-5)
 
         for epoch in range(epochs):
-            if True:
-                idx = torch.randperm(training_data.nelement())
-                training_data = training_data.view(-1)[idx].view(training_data.size())
-                reference_data = reference_data.view(-1)[idx].view(reference_data.size())
             running_loss = 0
-            optimizer.zero_grad()
-            output = self(training_data)
-            loss = criterion(output, reference_data)
-            loss.backward()
-            optimizer.step()
+            for data, ref_data in dataloader:
+                idx = torch.randperm(data.nelement())
+                training_data = data.view(-1)[idx].view(data.size())
+                reference_data = ref_data.view(-1)[idx].view(ref_data.size())
+                optimizer.zero_grad()
+                output = self(training_data)
+                loss = criterion(output, reference_data)
+                loss.backward()
+                optimizer.step()
 
-            running_loss += loss.item()
-            print(running_loss / len(training_data))
+                running_loss += loss.item()
+            print(running_loss / len(dataloader))
 
     def predict(self, data):
         output = self(data)
@@ -67,26 +66,43 @@ class NeuralNetwork(nn.Module):
 if __name__ == '__main__':
     train_data = DatasetUWB.DatasetUWD(8)
     train_data.import_static_data()
-    coords_train, reference_train = train_data.get_torch_dataset()
+    train = train_data.get_data_loader()
 
     test_data = DatasetUWB.DatasetUWD(8)
     test_data.import_file("./dane/pomiary/F8/f8_2p.xlsx")
-    coords_test, reference_test = test_data.get_torch_dataset()
+    test, ref_test = test_data.get_torch_dataset()
 
     device = 'cpu' if torch.cuda.is_available() else 'cpu'
     network = NeuralNetwork(2, 2).to(device)
 
-    # dataset = TensorDataset(coords_train, reference_train)
-    # dataloader = DataLoader(dataset)
-    # network.find_lr("cuda", dataloader)
+    # network.find_lr("cuda", train)
 
-    network.perform_training(300, coords_train, reference_train)
+    network.perform_training(10, train)
 
-    out = network.predict(coords_test)
+    for i in range(1, 4):
+        test_data.clear()
+        test_data.import_file(
+            './dane/pomiary/F' + str(test_data.audience_no) + '/f' + str(test_data.audience_no) + '_' + str(
+                i) + 'p.xlsx')
+        test, ref_test = test_data.get_torch_dataset()
+        out = network.predict(test)
+        dist = Errors.calc_distribution(ref_test, out)
+        dist_org = Errors.calc_distribution(ref_test, test)
+        Animation.distribution_plot(dist, dist_org,
+                                    'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'p.png')
+        Animation.track_plot(test, ref_test, out,
+                             'track_f' + str(test_data.audience_no) + '_' + str(i) + 'p.png')
 
-    dist = Errors.calc_distribution(reference_test, out)
-    dist_org = Errors.calc_distribution(reference_test, coords_test)
-
-    Animation.distribution_plot(dist, dist_org, 'distribution_f8.png')
-
-    Animation.track_plot(coords_test, reference_test, out, 'track.png')
+    for i in range(1, 3):
+        test_data.clear()
+        test_data.import_file(
+            './dane/pomiary/F' + str(test_data.audience_no) + '/f' + str(test_data.audience_no) + '_random_' + str(
+                i) + 'p.xlsx')
+        test, ref_test = test_data.get_torch_dataset()
+        out = network.predict(test)
+        dist = Errors.calc_distribution(ref_test, out)
+        dist_org = Errors.calc_distribution(ref_test, test)
+        Animation.distribution_plot(dist, dist_org,
+                                    'distribution_f' + str(test_data.audience_no) + '_random_' + str(i) + 'p.png')
+        Animation.track_plot(test, ref_test, out,
+                             'track_f' + str(test_data.audience_no) + '_random_' + str(i) + 'p.png')
