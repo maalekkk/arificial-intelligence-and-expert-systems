@@ -35,21 +35,18 @@ class NeuralNetwork(nn.Module):
         assert (len(training_data) == len(reference_data))
         criterion = nn.L1Loss()
         optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=5e-5)
-
         for epoch in range(epochs):
             if True:
                 idx = torch.randperm(training_data.nelement())
                 training_data = training_data.view(-1)[idx].view(training_data.size())
                 reference_data = reference_data.view(-1)[idx].view(reference_data.size())
-            running_loss = 0
             optimizer.zero_grad()
             output = self(training_data)
             loss = criterion(output, reference_data)
             loss.backward()
             optimizer.step()
 
-            running_loss += loss.item()
-            print(running_loss / len(training_data))
+            print(loss.item())
 
     def predict(self, data):
         output = self(data)
@@ -80,7 +77,7 @@ if __name__ == '__main__':
     # dataloader = DataLoader(dataset)
     # network.find_lr("cuda", dataloader)
 
-    network.perform_training(300, coords_train, reference_train)
+    network.perform_training(200, coords_train, reference_train)
 
     out = network.predict(coords_test)
 
