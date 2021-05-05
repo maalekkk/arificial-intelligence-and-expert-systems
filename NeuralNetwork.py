@@ -10,6 +10,80 @@ import DatasetUWB
 import pandas as pd
 
 
+def find_optimal_layers_no(training_data, training_refdata):
+    network2 = NeuralNetwork(2, 2)
+    network2.linear_relu_stack = nn.Sequential(
+        nn.Linear(2, 16),
+        nn.ReLU(),
+        nn.Linear(16, 16),
+        nn.ReLU(),
+        nn.Linear(16, 16),
+        nn.ReLU(),
+        nn.Linear(16, 2),
+        nn.ReLU()
+    )
+    network2_err = network2.perform_training(200, training_data, training_refdata)
+
+    network3 = NeuralNetwork(2, 2)
+    network3.linear_relu_stack = nn.Sequential(
+        nn.Linear(2, 16),
+        nn.ReLU(),
+        nn.Linear(16, 16),
+        nn.ReLU(),
+        nn.Linear(16, 16),
+        nn.ReLU(),
+        nn.Linear(16, 16),
+        nn.ReLU(),
+        nn.Linear(16, 2),
+        nn.ReLU()
+    )
+    network3_err = network3.perform_training(200, training_data, training_refdata)
+    print("Network2 err = " + str(network2_err) + ", network3 err = " + str(network3_err))
+
+
+def find_optimal_layers_neuron_no(training_data, training_refdata):
+    network1616 = NeuralNetwork(2, 2)
+    network1616.linear_relu_stack = nn.Sequential(
+        nn.Linear(2, 16),
+        nn.ReLU(),
+        nn.Linear(16, 16),
+        nn.ReLU(),
+        nn.Linear(16, 16),
+        nn.ReLU(),
+        nn.Linear(16, 2),
+        nn.ReLU()
+    )
+    network1616_err = network1616.perform_training(200, training_data, training_refdata)
+
+    network3216 = NeuralNetwork(2, 2)
+    network3216.linear_relu_stack = nn.Sequential(
+        nn.Linear(2, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 16),
+        nn.ReLU(),
+        nn.Linear(16, 2),
+        nn.ReLU()
+    )
+    network3216_err = network3216.perform_training(200, training_data, training_refdata)
+
+    network6432 = NeuralNetwork(2, 2)
+    network6432.linear_relu_stack = nn.Sequential(
+        nn.Linear(2, 64),
+        nn.ReLU(),
+        nn.Linear(64, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 2),
+        nn.ReLU()
+    )
+    network6432_err = network6432.perform_training(200, training_data, training_refdata)
+    print("Network1616 err = " + str(network1616_err) + ", network3216 err = " + str(network3216_err)
+          + ", network6416 err = " + str(network6432_err))
+
+
 def save_to_excel(distribution, file_name):
     df = pd.DataFrame(distribution, columns=['Distribution'])
     df.to_excel('./distributions/' + file_name, index=False)
@@ -36,13 +110,13 @@ class NeuralNetwork(nn.Module):
         vector = self.linear_relu_stack(x)
         return vector
 
-    def perform_training(self, epochs, training_data, reference_data, lr=2.07E-03):
+    def perform_training(self, epochs, training_data, reference_data, lr=2.07E-03, shuffle=True):
         assert (epochs > 0)
         assert (len(training_data) == len(reference_data))
         criterion = nn.L1Loss()
         optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=5e-5)
         for epoch in range(epochs):
-            if True:
+            if shuffle:
                 idx = torch.randperm(training_data.nelement())
                 training_data = training_data.view(-1)[idx].view(training_data.size())
                 reference_data = reference_data.view(-1)[idx].view(reference_data.size())
@@ -53,6 +127,7 @@ class NeuralNetwork(nn.Module):
             optimizer.step()
 
             print(loss.item())
+            return loss.item()
 
     def predict(self, data):
         output = self(data)
@@ -76,12 +151,18 @@ if __name__ == '__main__':
     test_data.import_file("./dane/pomiary/F8/f8_2p.xlsx")
     coords_test, reference_test = test_data.get_torch_dataset()
 
-    device = 'cpu' if torch.cuda.is_available() else 'cpu'
-    network = NeuralNetwork(2, 2).to(device)
+    network = NeuralNetwork(2, 2)
 
+    # Dobieranie odpowiedniego współczynnika uczenia
     # dataset = TensorDataset(coords_train, reference_train)
     # dataloader = DataLoader(dataset)
     # network.find_lr("cuda", dataloader)
+
+    # Dobieranie optymalnej liczby warstw ukrytych
+    # find_optimal_layers_no(coords_test, reference_test)
+
+    # Dobieranie optymalnej liczby neuronów w warstwach ukrytych
+    # find_optimal_layers_neuron_no(coords_test, reference_test)
 
     network.perform_training(200, coords_train, reference_train)
 
