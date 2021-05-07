@@ -121,13 +121,16 @@ class NeuralNetwork(nn.Module):
                 idx = torch.randperm(training_data.nelement())
                 training_data = training_data.view(-1)[idx].view(training_data.size())
                 reference_data = reference_data.view(-1)[idx].view(reference_data.size())
-            optimizer.zero_grad()
-            output = self(training_data)
-            loss = criterion(output, reference_data)
-            loss.backward()
-            optimizer.step()
-            return_loss = loss.item()
-            print(return_loss)
+            dataset = TensorDataset(training_data, reference_data)
+            dataloader = DataLoader(dataset, shuffle=True, batch_size=32)
+            for data, refdata in dataloader:
+                optimizer.zero_grad()
+                output = self(data)
+                loss = criterion(output, refdata)
+                loss.backward()
+                optimizer.step()
+                return_loss = loss.item()
+            print(return_loss/len(dataloader))
         return return_loss
 
     def predict(self, data):
@@ -165,7 +168,7 @@ if __name__ == '__main__':
     # Dobieranie optymalnej liczby neuronów w warstwach ukrytych
     # find_optimal_layers_neuron_no(coords_test, reference_test)
 
-    network.perform_training(200, coords_train, reference_train)
+    network.perform_training(15, coords_train, reference_train)
 
     for i in range(1, 4):
         test_data.clear()
