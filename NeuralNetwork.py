@@ -5,8 +5,15 @@ from torch.utils.data import DataLoader, TensorDataset
 from torch.utils.data import Dataset
 import Errors
 import random
+from statistics import mean
 import Animation
 import DatasetUWB
+import pandas as pd
+
+
+def save_to_excel(distribution, file_name):
+    df = pd.DataFrame(distribution, columns=['Distribution'])
+    df.to_excel('./distributions/' + file_name, index=False)
 
 
 class NeuralNetwork(nn.Module):
@@ -30,7 +37,7 @@ class NeuralNetwork(nn.Module):
         vector = self.linear_relu_stack(x)
         return vector
 
-    def perform_training(self, epochs, dataloader, lr=2.07E-03):
+    def perform_training(self, epochs, dataloader, lr=6.51E-04):
         assert (epochs > 0)
         criterion = nn.L1Loss()
         optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=5e-5)
@@ -38,16 +45,13 @@ class NeuralNetwork(nn.Module):
         for epoch in range(epochs):
             running_loss = 0
             for data, ref_data in dataloader:
-                idx = torch.randperm(data.nelement())
-                training_data = data.view(-1)[idx].view(data.size())
-                reference_data = ref_data.view(-1)[idx].view(ref_data.size())
                 optimizer.zero_grad()
-                output = self(training_data)
-                loss = criterion(output, reference_data)
+                output = self(data)
+                loss = criterion(output, ref_data)
                 loss.backward()
                 optimizer.step()
-
                 running_loss += loss.item()
+            print('Epoch' + str(epoch))
             print(running_loss / len(dataloader))
 
     def predict(self, data):
@@ -56,7 +60,7 @@ class NeuralNetwork(nn.Module):
 
     def find_lr(self, device, trainloader):
         criterion = nn.L1Loss()
-        optimizer = optim.Adam(self.parameters(), lr=0.000001, weight_decay=5e-5)
+        optimizer = optim.Adam(self.parameters(), lr=0.000001)
         lr_finder = LRFinder(self, optimizer, criterion, device=device)
         lr_finder.range_test(trainloader, end_lr=1, num_iter=500)
         lr_finder.plot()
@@ -69,15 +73,15 @@ if __name__ == '__main__':
     train = train_data.get_data_loader()
 
     test_data = DatasetUWB.DatasetUWD(8)
-    test_data.import_file("./dane/pomiary/F8/f8_2p.xlsx")
-    test, ref_test = test_data.get_torch_dataset()
+    # test_data.import_file("./dane/pomiary/F8/f8_2p.xlsx")
+    # test, ref_test = test_data.get_torch_dataset()
 
     device = 'cpu' if torch.cuda.is_available() else 'cpu'
     network = NeuralNetwork(2, 2).to(device)
 
-    # network.find_lr("cuda", train)
+    # network.find_lr("cpu", train)
 
-    network.perform_training(10, train)
+    network.perform_training(400, train)
 
     for i in range(1, 4):
         test_data.clear()
@@ -88,10 +92,26 @@ if __name__ == '__main__':
         out = network.predict(test)
         dist = Errors.calc_distribution(ref_test, out)
         dist_org = Errors.calc_distribution(ref_test, test)
+        save_to_excel(dist, 'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'p.xlsx')
         Animation.distribution_plot(dist, dist_org,
                                     'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'p.png')
         Animation.track_plot(test, ref_test, out,
                              'track_f' + str(test_data.audience_no) + '_' + str(i) + 'p.png')
+
+    for i in range(1, 4):
+        test_data.clear()
+        test_data.import_file(
+            './dane/pomiary/F' + str(test_data.audience_no) + '/f' + str(test_data.audience_no) + '_' + str(
+                i) + 'z.xlsx')
+        test, ref_test = test_data.get_torch_dataset()
+        out = network.predict(test)
+        dist = Errors.calc_distribution(ref_test, out)
+        dist_org = Errors.calc_distribution(ref_test, test)
+        save_to_excel(dist, 'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'z.xlsx')
+        Animation.distribution_plot(dist, dist_org,
+                                    'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'z.png')
+        Animation.track_plot(test, ref_test, out,
+                             'track_f' + str(test_data.audience_no) + '_' + str(i) + 'z.png')
 
     for i in range(1, 3):
         test_data.clear()
@@ -102,6 +122,7 @@ if __name__ == '__main__':
         out = network.predict(test)
         dist = Errors.calc_distribution(ref_test, out)
         dist_org = Errors.calc_distribution(ref_test, test)
+        save_to_excel(dist, 'distribution_f' + str(test_data.audience_no) + '_random_' + str(i) + 'p.xlsx')
         Animation.distribution_plot(dist, dist_org,
                                     'distribution_f' + str(test_data.audience_no) + '_random_' + str(i) + 'p.png')
         Animation.track_plot(test, ref_test, out,
