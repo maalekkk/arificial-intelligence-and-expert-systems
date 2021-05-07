@@ -22,7 +22,7 @@ def find_optimal_layers_no(training_data, training_refdata):
         nn.Linear(16, 2),
         nn.ReLU()
     )
-    network2_err = network2.perform_training(200, training_data, training_refdata)
+    network2_err = network2.perform_training(15, training_data, training_refdata)
 
     network3 = NeuralNetwork(2, 2)
     network3.linear_relu_stack = nn.Sequential(
@@ -37,7 +37,7 @@ def find_optimal_layers_no(training_data, training_refdata):
         nn.Linear(16, 2),
         nn.ReLU()
     )
-    network3_err = network3.perform_training(200, training_data, training_refdata)
+    network3_err = network3.perform_training(15, training_data, training_refdata)
     print("Network2 err = " + str(network2_err) + ", network3 err = " + str(network3_err))
 
 
@@ -53,7 +53,7 @@ def find_optimal_layers_neuron_no(training_data, training_refdata):
         nn.Linear(16, 2),
         nn.ReLU()
     )
-    network1616_err = network1616.perform_training(200, training_data, training_refdata)
+    network1616_err = network1616.perform_training(15, training_data, training_refdata)
 
     network3216 = NeuralNetwork(2, 2)
     network3216.linear_relu_stack = nn.Sequential(
@@ -66,7 +66,7 @@ def find_optimal_layers_neuron_no(training_data, training_refdata):
         nn.Linear(16, 2),
         nn.ReLU()
     )
-    network3216_err = network3216.perform_training(200, training_data, training_refdata)
+    network3216_err = network3216.perform_training(15, training_data, training_refdata)
 
     network6432 = NeuralNetwork(2, 2)
     network6432.linear_relu_stack = nn.Sequential(
@@ -79,7 +79,7 @@ def find_optimal_layers_neuron_no(training_data, training_refdata):
         nn.Linear(16, 2),
         nn.ReLU()
     )
-    network6432_err = network6432.perform_training(200, training_data, training_refdata)
+    network6432_err = network6432.perform_training(15, training_data, training_refdata)
     print("Network1616 err = " + str(network1616_err) + ", network3216 err = " + str(network3216_err)
           + ", network6416 err = " + str(network6432_err))
 
