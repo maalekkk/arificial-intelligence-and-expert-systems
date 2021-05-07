@@ -115,8 +115,9 @@ class NeuralNetwork(nn.Module):
         assert (len(training_data) == len(reference_data))
         criterion = nn.L1Loss()
         optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=5e-5)
-        return_loss = 0.0
+        return_loss = 0
         for epoch in range(epochs):
+            return_loss = 0.0
             if shuffle:
                 idx = torch.randperm(training_data.nelement())
                 training_data = training_data.view(-1)[idx].view(training_data.size())
@@ -129,7 +130,7 @@ class NeuralNetwork(nn.Module):
                 loss = criterion(output, refdata)
                 loss.backward()
                 optimizer.step()
-                return_loss = loss.item()
+                return_loss += loss.item()
             print(return_loss/len(dataloader))
         return return_loss
 
