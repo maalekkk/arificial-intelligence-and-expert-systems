@@ -31,6 +31,12 @@ class DatasetUWD:
                 i) + ".xlsx"
             self.import_file(file_path, err_tolerance=err_tolerance)
 
+    def import_random_data(self, err_tolerance=500):
+        for i in range(1, 3):
+            file_path = "./dane/pomiary/F" + str(self.audience_no) + "/f" + str(self.audience_no) + "_random_" + str(
+                i) + "p.xlsx"
+            self.import_file(file_path, err_tolerance=err_tolerance)
+
     def get_torch_dataset(self):
         return torch.from_numpy(np.array(self.coords).astype(np.float32)), torch.from_numpy(
             np.array(self.reference).astype(np.float32))
@@ -39,7 +45,7 @@ class DatasetUWD:
         coords = torch.tensor(self.coords, dtype=torch.float)
         reference = torch.tensor(self.reference, dtype=torch.float)
         dataset = TensorDataset(coords, reference)
-        dataloader = DataLoader(dataset, shuffle=True, batch_size=32)
+        dataloader = DataLoader(dataset, shuffle=True, batch_size=16)
         return dataloader
 
     def clear(self):

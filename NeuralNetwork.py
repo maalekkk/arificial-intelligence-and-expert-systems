@@ -81,37 +81,37 @@ if __name__ == '__main__':
 
     # network.find_lr("cpu", train)
 
-    network.perform_training(400, train)
+    network.perform_training(200, train)
 
-    for i in range(1, 4):
-        test_data.clear()
-        test_data.import_file(
-            './dane/pomiary/F' + str(test_data.audience_no) + '/f' + str(test_data.audience_no) + '_' + str(
-                i) + 'p.xlsx')
-        test, ref_test = test_data.get_torch_dataset()
-        out = network.predict(test)
-        dist = Errors.calc_distribution(ref_test, out)
-        dist_org = Errors.calc_distribution(ref_test, test)
-        save_to_excel(dist, 'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'p.xlsx')
-        Animation.distribution_plot(dist, dist_org,
-                                    'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'p.png')
-        Animation.track_plot(test, ref_test, out,
-                             'track_f' + str(test_data.audience_no) + '_' + str(i) + 'p.png')
-
-    for i in range(1, 4):
-        test_data.clear()
-        test_data.import_file(
-            './dane/pomiary/F' + str(test_data.audience_no) + '/f' + str(test_data.audience_no) + '_' + str(
-                i) + 'z.xlsx')
-        test, ref_test = test_data.get_torch_dataset()
-        out = network.predict(test)
-        dist = Errors.calc_distribution(ref_test, out)
-        dist_org = Errors.calc_distribution(ref_test, test)
-        save_to_excel(dist, 'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'z.xlsx')
-        Animation.distribution_plot(dist, dist_org,
-                                    'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'z.png')
-        Animation.track_plot(test, ref_test, out,
-                             'track_f' + str(test_data.audience_no) + '_' + str(i) + 'z.png')
+    # for i in range(1, 4):
+    #     test_data.clear()
+    #     test_data.import_file(
+    #         './dane/pomiary/F' + str(test_data.audience_no) + '/f' + str(test_data.audience_no) + '_' + str(
+    #             i) + 'p.xlsx')
+    #     test, ref_test = test_data.get_torch_dataset()
+    #     out = network.predict(test)
+    #     dist = Errors.calc_distribution(ref_test, out)
+    #     dist_org = Errors.calc_distribution(ref_test, test)
+    #     save_to_excel(dist, 'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'p.xlsx')
+    #     Animation.distribution_plot(dist, dist_org,
+    #                                 'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'p.png')
+    #     Animation.track_plot(test, ref_test, out,
+    #                          'track_f' + str(test_data.audience_no) + '_' + str(i) + 'p.png')
+    #
+    # for i in range(1, 4):
+    #     test_data.clear()
+    #     test_data.import_file(
+    #         './dane/pomiary/F' + str(test_data.audience_no) + '/f' + str(test_data.audience_no) + '_' + str(
+    #             i) + 'z.xlsx')
+    #     test, ref_test = test_data.get_torch_dataset()
+    #     out = network.predict(test)
+    #     dist = Errors.calc_distribution(ref_test, out)
+    #     dist_org = Errors.calc_distribution(ref_test, test)
+    #     save_to_excel(dist, 'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'z.xlsx')
+    #     Animation.distribution_plot(dist, dist_org,
+    #                                 'distribution_f' + str(test_data.audience_no) + '_' + str(i) + 'z.png')
+    #     Animation.track_plot(test, ref_test, out,
+    #                          'track_f' + str(test_data.audience_no) + '_' + str(i) + 'z.png')
 
     for i in range(1, 3):
         test_data.clear()
