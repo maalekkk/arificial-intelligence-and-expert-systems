@@ -115,6 +115,7 @@ class NeuralNetwork(nn.Module):
         assert (len(training_data) == len(reference_data))
         criterion = nn.L1Loss()
         optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=5e-5)
+        return_loss = 0.0
         for epoch in range(epochs):
             if shuffle:
                 idx = torch.randperm(training_data.nelement())
@@ -125,9 +126,9 @@ class NeuralNetwork(nn.Module):
             loss = criterion(output, reference_data)
             loss.backward()
             optimizer.step()
-
-            print(loss.item())
-            return loss.item()
+            return_loss = loss.item()
+            print(return_loss)
+        return return_loss
 
     def predict(self, data):
         output = self(data)
@@ -165,13 +166,6 @@ if __name__ == '__main__':
     # find_optimal_layers_neuron_no(coords_test, reference_test)
 
     network.perform_training(200, coords_train, reference_train)
-
-    out = network.predict(coords_test)
-
-    dist = Errors.calc_distribution(reference_test, out)
-    dist_org = Errors.calc_distribution(reference_test, coords_test)
-
-    Animation.track_plot(coords_test, reference_test, out, 'track.png')
 
     for i in range(1, 4):
         test_data.clear()
