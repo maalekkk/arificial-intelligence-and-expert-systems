@@ -17,7 +17,6 @@ def save_to_excel(distribution, file_name):
 
 
 class NeuralNetwork(nn.Module):
-
     def __init__(self, inputs_size, output_size, hidden_neurons=None):
         super(NeuralNetwork, self).__init__()
         if hidden_neurons is None:
