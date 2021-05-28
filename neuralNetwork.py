@@ -17,7 +17,6 @@ def save_to_excel(distribution, file_name):
 
 
 class NeuralNetwork(nn.Module):
-
     def __init__(self, inputs_size, output_size, hidden_neurons=None):
         super(NeuralNetwork, self).__init__()
         if hidden_neurons is None:
@@ -79,9 +78,8 @@ class NeuralNetwork(nn.Module):
         lr_finder.reset()
 
 
-def predict_calc_and_plot(audience_no, file_path):
-    len_of_name = -5 if audience_no == 8 else -6
-    name = Path(file_path).name[:len_of_name]
+def predict_calc_and_plot(file_path):
+    name = Path(file_path).name[:-5]
     data, ref_data = get_data_from_excel(file_path)
 
     prediction = network.predict(tensor(data))
@@ -106,12 +104,12 @@ if __name__ == '__main__':
     # network.find_lr(coords_train, reference_train)
 
     # Training
-    network.perform_training(50, coords_train, reference_train)
+    network.perform_training(200, coords_train, reference_train)
 
     # Predict, calculate error and plot for F8 audience
     # for path in F8_TEST_FILES_PATHS:
-    #     predict_calc_and_plot(8, path)
+    #     predict_calc_and_plot(path)
 
     # Predict, calculate error and plot for F10 audience
     for path in F10_TEST_FILES_PATHS:
-        predict_calc_and_plot(10, path)
+        predict_calc_and_plot(path)
